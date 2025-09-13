@@ -80,7 +80,7 @@ Next > Role Name : AppName-EKSWorkerNodeRole > Create Role
 
 - Click next
 -  Review and create
--   
+
 # STEP-2: Launch k8s Workstation and connect it to EKS cluster
 
  ● Os: ubuntu 20.0 
@@ -88,5 +88,13 @@ Next > Role Name : AppName-EKSWorkerNodeRole > Create Role
 ● Ports: 22, 80, 443 ( open all traffic ) 
 ● Repo: git clone https://github.com/amahmoodi311/crm-app-manual.git
 
+# Install aws cli : 
 
+sudo apt install unzip 
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o 
+"awscliv2.zip" 
+unzip awscliv2.zip 
+sudo ./aws/install 
+/usr/local/bin/aws --version 
+aws --version 
 
