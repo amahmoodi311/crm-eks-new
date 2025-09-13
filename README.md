@@ -97,3 +97,65 @@ unzip awscliv2.zip
 sudo ./aws/install
 /usr/local/bin/aws --version
 aws --version
+
+## Install Kubectl
+
+- **Official Docs:** [Install kubectl for EKS](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
+
+### Download and Install Kubectl
+```bash
+curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.31.3/2024-12-12/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo cp kubectl /usr/local/bin/
+kubectl version --client
+
+## Configure AWS CLI
+
+### 1. Create Access Key and Secret Key
+- **Generate access key and secret key in AWS**
+  - Go to **IAM** → **Security Credentials**
+    - Click **Create Access Key**
+    - Copy the **Access Key** and **Secret Key** safely
+
+![file](https://github.com/amahmoodi311/crm-eks-new/blob/428adb9bb05b8313d5e8e6c00bad28f076522a9f/image/eks-14.png)
+
+![file](https://github.com/amahmoodi311/crm-eks-new/blob/428adb9bb05b8313d5e8e6c00bad28f076522a9f/image/eks-15.png)
+
+## Configure AWS CLI
+
+### 1. Run AWS Configure
+```bash
+aws configure
+# You will be prompted to enter:
+# AWS Access Key ID [None]: *************
+# AWS Secret Access Key [None]: *****************
+# Default region name [None]: ap-south-1
+# Default output format [None]: json
+aws sts get-caller-identity
+aws s3 ls
+
+## Connect EKS Cluster to Workstation
+
+### 1. Update kubeconfig
+Run the following command to configure your local workstation to connect to the EKS cluster:
+
+```bash
+aws eks update-kubeconfig --name <cluster-name> --region <region-name>
+
+## Step 2: Deploy Application on EKS
+
+### 1. Clone the Application Repository
+```bash
+git clone https://github.com/amahmoodi311/crm-app-manual.git
+cd lms-app
+2. Install and Setup Docker
+Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+Manage Docker Permissions
+sudo usermod -aG docker $USER
+newgrp docker
+Verify Docker Installation
+docker --version
+docker image ls
+yaml
