@@ -90,11 +90,10 @@ Next > Role Name : AppName-EKSWorkerNodeRole > Create Role
 
 # Install aws cli : 
 
-sudo apt install unzip 
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o 
-"awscliv2.zip" 
-unzip awscliv2.zip 
-sudo ./aws/install 
-/usr/local/bin/aws --version 
-aws --version 
-
+```bash
+sudo apt install unzip
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+/usr/local/bin/aws --version
+aws --version
