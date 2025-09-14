@@ -146,16 +146,16 @@ aws eks update-kubeconfig --name <cluster-name> --region <region-name>
 
 ### 1. Clone the Application Repository
 ```bash
-git clone https://github.com/amahmoodi311/crm-app-manual.git
+git clone https://github.com/muralialakuntla3/lms-app.git
 cd lms-app
-2. Install and Setup Docker
-Install Docker
+
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
-Manage Docker Permissions
 sudo usermod -aG docker $USER
 newgrp docker
-Verify Docker Installation
 docker --version
 docker image ls
-yaml
+
+
+
+
