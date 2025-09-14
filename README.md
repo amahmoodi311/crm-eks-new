@@ -132,13 +132,16 @@ aws eks update-kubeconfig --name <cluster-name> --region <region-name>
 #  Deploy Application on EKS
 - git clone  https://github.com/amahmoodi311/crm-app-manual.git
 
-# Setup Docker 
+## Setup Docker
+```bash
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 sudo usermod -aG docker $USER
 newgrp docker
 docker --version
 docker image ls
+ 
+
 
 # Create Secrets
 apiVersion: v1
