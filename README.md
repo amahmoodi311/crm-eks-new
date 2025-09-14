@@ -4,24 +4,24 @@
 STEPS: 
 1. Create EKS cluster and add Nodegroup 
 2. Launch k8s Workstation and connect it to EKS cluster 
-STEP-1: Create EKS cluster and add Nodegroup 
-● Login to aws and goto EKS section 
-● Now click on create cluster
+- STEP-1: Create EKS cluster and add Nodegroup 
+- Login to aws and goto EKS section 
+- Now click on create cluster
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/56a4bb152252b76c231d45ae84d03e2450180b01/eks-1.png)
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/55d2ff62fe923581b65b8e81327572d4a682ce5b/eks-2.png)
 
-○ Give a proper cluster name: hpa-cluster 
-○ Select IAM role if you don’t have create one
+- Give a proper cluster name: hpa-cluster 
+- Select IAM role if you don’t have create one
 
-○ Click on create role  
-■ Select EKS cluster related policies 
+- Click on create role  
+- Select EKS cluster related policies 
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/76e7b6f7e4d0343e686963c3c77e667bc7998a82/eks-3.png)
 
-● Now goto your configuration and select created role 
-● Configure cluster 
+- Now goto your configuration and select created role 
+- Configure cluster 
 ○ Insert your role here 
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/76e7b6f7e4d0343e686963c3c77e667bc7998a82/eks-4.png)
@@ -48,33 +48,33 @@ STEP-1: Create EKS cluster and add Nodegroup
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/59bb88d19d5d3a97b23841c16532a03c151fb991/image/eks-10.png)
 
-● Once cluster created add Nodegroup to it 
-● Goto your EKS cluster 
-● Goto compute section 
-● Click on Add Nodegroup 
+- Once cluster created add Nodegroup to it 
+- Goto your EKS cluster 
+- Goto compute section 
+- Click on Add Nodegroup 
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/59bb88d19d5d3a97b23841c16532a03c151fb991/image/eks-11.png)
 
-● Select IAM role if you don’t have create one 
-○ Click on create role  
-■ Select EKS cluster Nodegroup related policies 
-● Create IAM Role with following policies  
-○ AmazonEKSWorkerNodePolicy 
-○ AmazonEC2ContainerRegistryPullOnly 
-○ AmazonEKS_CNI_Policy 
-○ AmazonEC2ContainerRegistryReadOnly 
-● AWS > Services > IAM > Roles > Create Role > Select AWS Service > 
+- Select IAM role if you don’t have create one 
+- Click on create role  
+- Select EKS cluster Nodegroup related policies 
+- Create IAM Role with following policies  
+- AmazonEKSWorkerNodePolicy 
+- AmazonEC2ContainerRegistryPullOnly 
+- AmazonEKS_CNI_Policy 
+- AmazonEC2ContainerRegistryReadOnly 
+- AWS > Services > IAM > Roles > Create Role > Select AWS Service > 
 Use Case : EC2 > Policy : AmazonEKSWorkerNodePolicy - 
 AmazonEKS_CNI_Policy - AmazonEC2ContainerRegistryReadOnly  > 
 Next > Role Name : AppName-EKSWorkerNodeRole > Create Role 
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/59bb88d19d5d3a97b23841c16532a03c151fb991/image/eks-12.png)
 
-● Goto your cluster 
-● Select: compute > add node group 
-○ Configure node group 
-■ Name: hpa-nodegroup 
-■ Add IAM role: amazoneksnoderole 
+- Goto your cluster 
+- Select: compute > add node group 
+- Configure node group 
+- Name: hpa-nodegroup 
+- Add IAM role: amazoneksnoderole 
 
 ![file](https://github.com/amahmoodi311/crm-eks-new/blob/59bb88d19d5d3a97b23841c16532a03c151fb991/image/eks-13.png)
 
@@ -168,5 +168,127 @@ echo -n qwerty1234 | base64
 > UXdlcnR5QDEyMw==  
 ```
 
+# Apply it:
+```
+kubectl apply -f mysql-secret.yml
+kubectl get secret mysql-secret -o yaml
+```
 
+# Setup Database and service
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+            - name: MYSQL_DATABASE
+              value: crmdb
+          ports:
+            - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+```
+
+# Apply it:
+```
+kubectl apply -f mysql-deployment.yml
+kubectl get pods
+```
+# Deploy Backend (crm-api)
+
+# Make sure your application.yml looks like this:
+```
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+server:
+  port: 3000
+```
+
+# Backend Deployment + Service
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lms-be
+  template:
+    metadata:
+      labels:
+        app: lms-be
+    spec:
+      containers:
+        - name: backend-container
+          image: amahmoodi311/crmback:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DB_HOST
+              value: "mysql-cluster-ip-service"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_USER
+              value: "root"
+            - name: DB_NAME
+              value: "crmdb"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lms-be-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: lms-be
+  ports:
+    - port: 3000
+      targetPort: 3000
+```
 
