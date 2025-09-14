@@ -88,7 +88,7 @@ Next > Role Name : AppName-EKSWorkerNodeRole > Create Role
 ● Ports: 22, 80, 443 ( open all traffic ) 
 ● Repo: git clone https://github.com/amahmoodi311/crm-app-manual.git
 
-Install AWS CLI
+# Install AWS CLI
 sudo apt install unzip -y
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
@@ -96,44 +96,43 @@ sudo ./aws/install
 /usr/local/bin/aws --version
 aws --version
 
-2. Install Kubectl
+# Install Kubectl
 
-Official Docs: Install kubectl for EKS
+Official Docs: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html 
 
 curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.31.3/2024-12-12/bin/linux/amd64/kubectl
 chmod +x ./kubectl
 sudo cp kubectl /usr/local/bin/
 kubectl version --client
 
-3. Configure AWS CLI
-Step-1: Create Access & Secret Keys
-
-Login to AWS → IAM → Security Credentials
-
-Create new Access Key and Secret Key
-
-Save them securely
-
-(paste screenshot here)
-(paste screenshot here)
-Step-2: Run AWS Configure
-aws configure
-# Enter:
-# AWS Access Key ID: *************
-# AWS Secret Access Key: *************
-# Default region name: ap-south-1
-# Default output format: json
+# Configure AWS CLI
+- Create Access & Secret Keys
+- Login to AWS → IAM → Security Credentials
+- Create new Access Key and Secret Key
+- Save them securely
 
 
-Validate credentials:
+![file](https://github.com/amahmoodi311/crm-eks-new/blob/428adb9bb05b8313d5e8e6c00bad28f076522a9f/image/eks-14.png)
 
-aws sts get-caller-identity
-aws s3 ls
+![file](https://github.com/amahmoodi311/crm-eks-new/blob/428adb9bb05b8313d5e8e6c00bad28f076522a9f/image/eks-15.png)
 
-4. Connect Workstation to EKS
+# aws configure
+- AWS Access Key ID: *************
+- AWS Secret Access Key: *************
+- Default region name: ap-south-1
+- Default output format: json
+
+# Check the user credentials before config the cluster to host machine 
+- aws sts get-caller-identity
+- aws s3 ls
+
+# Connect Workstation to EKS
 aws eks update-kubeconfig --name <cluster-name> --region <region-name>
 
-5. Setup Docker (Optional for Building Images)
+#  Deploy Application on EKS
+- git clone  https://github.com/amahmoodi311/crm-app-manual.git
+
+# Setup Docker 
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 sudo usermod -aG docker $USER
@@ -141,6 +140,19 @@ newgrp docker
 docker --version
 docker image ls
 
+# Create Secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+type: Opaque
+data:
+  password: QWRtaW4xMjM= Admin123
+
+# Encrypt the password 
+- echo -n <your-password> | base64
+- echo -n qwerty1234 | base64 
+> UXdlcnR5QDEyMw==  
 
 
 
