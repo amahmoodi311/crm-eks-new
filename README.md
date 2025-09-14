@@ -82,30 +82,34 @@ Next > Role Name : AppName-EKSWorkerNodeRole > Create Role
 -  Review and create
 
 # STEP-2: Launch k8s Workstation and connect it to EKS cluster
-
+```
  ● Os: ubuntu 20.0 
 ● T2.medium 
 ● Ports: 22, 80, 443 ( open all traffic ) 
 ● Repo: git clone https://github.com/amahmoodi311/crm-app-manual.git
-
+```
 # Install AWS CLI
+```
 sudo apt install unzip -y
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install
 /usr/local/bin/aws --version
 aws --version
+```
 
 # Install Kubectl
-
+```
 Official Docs: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html 
 
 curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.31.3/2024-12-12/bin/linux/amd64/kubectl
 chmod +x ./kubectl
 sudo cp kubectl /usr/local/bin/
 kubectl version --client
+```
 
 # Configure AWS CLI
+
 - Create Access & Secret Keys
 - Login to AWS → IAM → Security Credentials
 - Create new Access Key and Secret Key
