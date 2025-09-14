@@ -140,10 +140,11 @@ sudo usermod -aG docker $USER
 newgrp docker
 docker --version
 docker image ls
- 
+ ```
 
 
 # Create Secrets
+```
 apiVersion: v1
 kind: Secret
 metadata:
@@ -151,7 +152,7 @@ metadata:
 type: Opaque
 data:
   password: QWRtaW4xMjM= Admin123
-
+```
 # Encrypt the password 
 - echo -n <your-password> | base64
 - echo -n qwerty1234 | base64 
