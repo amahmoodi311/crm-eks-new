@@ -292,3 +292,55 @@ spec:
       targetPort: 3000
 ```
 
+# Apply it:
+```
+kubectl apply -f be-deployment.yml
+kubectl get svc lms-be-service
+```
+
+# Check if the backend is working:
+
+![file](https://github.com/amahmoodi311/crm-eks-new/blob/86cd987b3ab724f580b039da82e2e9c3ddffb4f5/image/jav-2.png)
+
+# Deploy Frontend (crm-web) and service
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lms-fe
+  template:
+    metadata:
+      labels:
+        app: lms-fe
+    spec:
+      containers:
+        - name: frontend-container
+          image: amahmoodi311/crmfront:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lms-fe-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: lms-fe
+  ports:
+    - port: 80
+      targetPort: 80
+ ```
+# Apply it:
+```
+kubectl apply -f fe-deployment.yml
+kubectl get svc lms-fe-service
+```
+
+# Final web-app:
+![file](https://github.com/amahmoodi311/crm-eks-new/blob/86cd987b3ab724f580b039da82e2e9c3ddffb4f5/image/crm-doc5.png)
