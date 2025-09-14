@@ -123,15 +123,19 @@ kubectl version --client
 - Default output format: json
 
 # Check the user credentials before config the cluster to host machine 
+ ```
  aws sts get-caller-identity
  aws s3 ls
+```
 
 # Connect Workstation to EKS
+```
 aws eks update-kubeconfig --name <cluster-name> --region <region-name>
-
+```
 #  Deploy Application on EKS
+```
 - git clone  https://github.com/amahmoodi311/crm-app-manual.git
-
+```
 ## Setup Docker
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -154,10 +158,11 @@ data:
   password: QWRtaW4xMjM= Admin123
 ```
 # Encrypt the password 
+```
 echo -n <your-password> | base64
 echo -n qwerty1234 | base64 
 > UXdlcnR5QDEyMw==  
-
+```
 
 
 
