@@ -54,12 +54,14 @@ jobs:
       # Build Backend Docker image
       - name: Build backend image
         run: |
-          docker build --no-cache -t ${{ vars.DOCKER_USERNAME }}/crm-api:latest ./crm-api
+          cd crm-api
+          docker build --no-cache -t ${{ vars.DOCKER_USERNAME }}/crm-api:latest ./crm-api .
 
       # Build Frontend Docker image
       - name: Build frontend image
         run: |
-          docker build --no-cache -t ${{ vars.DOCKER_USERNAME }}/crm-web:latest ./crm-web
+          cd crm-web
+          docker build --no-cache -t ${{ vars.DOCKER_USERNAME }}/crm-web:latest ./crm-web .
 
       # Push Backend Docker image
       - name: Push backend image
