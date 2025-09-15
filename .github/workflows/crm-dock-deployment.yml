@@ -20,13 +20,19 @@ jobs:
 
       - name: Setup MySQL
         run: |
+          # Remove existing container if it exists
           if docker ps -a --format '{{.Names}}' | grep -wq crmdb; then
-            echo "crmdb already exists, skipping creation"
-          else
-            docker run -d --name crmdb \
-              -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e MYSQL_DATABASE=crm \
-              -p 3306:3306 mysql:8
+            echo "crmdb already exists, removing old container"
+            docker rm -f crmdb
+          fi
+
+          # Run MySQL container
+          docker run -d --name crmdb \
+            -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            -e MYSQL_DATABASE=crm \
+            -p 3306:3306 \
+            --network crmnetwork \
+            mysql:8
 
   build:
     needs: database
