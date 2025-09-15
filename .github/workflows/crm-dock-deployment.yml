@@ -9,14 +9,14 @@ jobs:
     steps:
       - name: create network
         run: |
-           if docker network ls --format '{{ .Name}}' | grep -wq crmnetwork; then
+           if docker network ls --format '{{ .Name }}' | grep -wq crmnetwork; then
              echo "crmnetwork exists"
            else
              docker network create crmnetwork
             fi
       - name: crmdb container
         run: |
-          if docker ps -a --format '{{ .Name}}' | grep -wq crmdb; then
+          if docker ps -a --format '{{ .Names }}' | grep -wq crmdb; then
             echo "crmdb container exists"
           else
             docker container run -dt --name crmdb -p 3306:3306 --network crmnetwork -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }}  -e MYSQL_DATABASE=crm mysql:8
