@@ -1,10 +1,10 @@
 name: CRM Docker Deployment
 
 on:
-  workflow_dispatch:     # allows manual trigger
+  workflow_dispatch:
   push:
     branches:
-      - main            # triggers on push to main branch
+      - main
 
 jobs:
   database:
@@ -70,3 +70,43 @@ jobs:
       # Push Frontend Docker image
       - name: Push frontend image
         run: docker push ${{ vars.DOCKER_USERNAME }}/crm-web:latest
+
+  backend:
+    needs:
+      - build
+      - database
+    runs-on: deploy
+    steps:
+      - name: Pull backend image
+        run: docker pull ${{ vars.DOCKER_USERNAME }}/crm-api:latest
+
+      - name: Run backend container
+        run: |
+          if docker ps -a --format '{{ .Names }}' | grep -wq crm-backend; then
+            echo "Removing existing backend container..."
+            docker container rm -f crm-backend
+          fi
+          docker container run -dt --name crm-backend -p 4000:4000 \
+            --network crmnetwork \
+            -e DATABASE_URL=mysql://root:${{ secrets.DB_PASSWORD }}@crmdb:3306/crm \
+            -e PORT=4000 \
+            -e MODE=local \
+            ${{ vars.DOCKER_USERNAME }}/crm-api:latest
+
+  frontend:
+    needs:
+      - build
+      - backend
+    runs-on: deploy
+    steps:
+      - name: Pull frontend image
+        run: docker pull ${{ vars.DOCKER_USERNAME }}/crm-web:latest
+
+      - name: Run frontend container
+        run: |
+          if docker ps -a --format '{{ .Names }}' | grep -wq crm-web; then
+            echo "Removing existing frontend container..."
+            docker container rm -f crm-web
+          fi
+          docker container run -dt --name crm-web --network crmnetwork -p 8081:80 \
+            ${{ vars.DOCKER_USERNAME }}/crm-web:latest
