@@ -7,9 +7,9 @@ jobs:
   database:
     runs-on: self-hosted
     steps:
-      - name: create netwrok
+      - name: create network
         run: |
-           if docker network -ls --format '{{ .Name}}' | grep -wq crmnetwrok; then
+           if docker network -ls --format '{{ .Name}}' | grep -wq crmnetwork; then
              echo "crmnetwork exists"
            else
              docker network create crmnetwork
