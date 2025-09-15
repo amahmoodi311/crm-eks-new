@@ -21,4 +21,31 @@ jobs:
           else
             docker container run -dt --name crmdb -p 3306:3306 --network crmnetwork -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }}  -e MYSQL_DATABASE=crm mysql:8
           fi
-            
+    
+build:
+  needs: database
+  runs-on: ubuntu-latest
+  steps:
+   - name: check code
+     uses: actions/checkout@v4.2.2
+
+   - name: Build backend image
+     run: |
+        cd crm-api
+        docker build -t ${{ vars.DOCKER_USERNAME }}/crm-api:latest .
+
+      
+   - name: frontend image
+     run: |
+        cd crm-web
+        docker build -t ${{ vars.DOCKER_USERNAME }}/crm-web:latest .
+
+  
+   - name: Push backend image
+     run: docker push ${{ vars.DOCKER_USERNAME }}/crm-api:latest
+
+   - name: Push frontend image
+     run: docker push ${{ vars.DOCKER_USERNAME }}/crm-web:latest 
+        
+    
+  
