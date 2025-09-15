@@ -7,21 +7,25 @@ jobs:
   database:
     runs-on: self-hosted
     steps:
-      - name: create network
+      - name: Create Docker network
         run: |
-           if docker network ls --format '{{ .Name }}' | grep -wq crmnetwork; then
-             echo "crmnetwork exists"
-           else
-             docker network create crmnetwork
-            fi
-      - name: crmdb container
-        run: |
-          if docker ps -a --format '{{ .Names }}' | grep -wq crmdb; then
-            echo "crmdb container exists"
+          if docker network ls --format '{{ .Name }}' | grep -wq crmnetwork; then
+            echo "crmnetwork exists"
           else
-            docker container run -dt --name crmdb -p 3306:3306 --network crmnetwork -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }}  -e MYSQL_DATABASE=crm mysql:8
+            docker network create crmnetwork
           fi
-    
+
+      - name: Setup MySQL
+        run: |
+          if docker ps -a --format '{{.Names}}' | grep -wq crmdb; then
+            echo "crmdb already exists, skipping creation"
+          else
+            docker run -d --name crmdb \
+              -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e MYSQL_DATABASE=crm \
+              -p 3306:3306 mysql:8
+          fi
+
   build:
     needs: database
     runs-on: ubuntu-latest
@@ -32,14 +36,12 @@ jobs:
       # Backend
       - name: Build backend image
         run: |
-          cd crm-api
-          docker build -t ${{ vars.DOCKER_USERNAME}}/crm-api:latest .
+          docker build -t ${{ vars.DOCKER_USERNAME }}/crm-api:latest ./crm-api
 
       # Frontend
       - name: Build frontend image
         run: |
-          cd crm-web
-          docker build -t ${{ vars.DOCKER_USERNAME}}/crm-web:latest .
+          docker build -t ${{ vars.DOCKER_USERNAME }}/crm-web:latest ./crm-web
 
       - name: Docker login
         uses: docker/login-action@v3.4.0
@@ -54,5 +56,3 @@ jobs:
       # Push frontend
       - name: Push frontend image
         run: docker push ${{ vars.DOCKER_USERNAME }}/crm-web:latest
-    
-  
