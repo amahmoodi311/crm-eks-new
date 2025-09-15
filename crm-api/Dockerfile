@@ -1,13 +1,24 @@
-FROM node:18
+# Build stage: Maven + JDK 21
+FROM maven:3.9.7-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --production
+# Copy project files
+COPY pom.xml .
+COPY src ./src
 
-COPY . .
+# Build the project
+RUN mvn clean package -DskipTests
 
-ENV PORT=4000
-EXPOSE 4000
+# Runtime stage: smaller JDK 21 image
+FROM eclipse-temurin:21-jdk-jammy
 
-CMD ["sh", "-c", "npm run start || node index.js"]
+WORKDIR /app
+
+# Copy jar from build stage
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "app.jar"]
+
