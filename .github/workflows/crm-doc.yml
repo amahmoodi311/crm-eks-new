@@ -25,14 +25,14 @@ jobs:
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-backend:latest
           docker build -t $IMAGE ./crm-api
           docker push $IMAGE
-          echo "backend_image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "::set-output name=backend_image::$IMAGE"
 
       - id: frontend
         run: |
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-frontend:latest
           docker build -t $IMAGE ./crm-web
           docker push $IMAGE
-          echo "frontend_image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "::set-output name=frontend_image::$IMAGE"
 
   database:
     runs-on: self-hosted
@@ -65,6 +65,7 @@ jobs:
     env:
       BACKEND_IMAGE: ${{ needs.build.outputs.backend_image }}
     steps:
+      - run: echo "Backend image: $BACKEND_IMAGE"  # debug
       - run: docker pull $BACKEND_IMAGE
 
       - run: |
@@ -85,6 +86,7 @@ jobs:
     env:
       FRONTEND_IMAGE: ${{ needs.build.outputs.frontend_image }}
     steps:
+      - run: echo "Frontend image: $FRONTEND_IMAGE"  # debug
       - run: docker pull $FRONTEND_IMAGE
 
       - run: |
