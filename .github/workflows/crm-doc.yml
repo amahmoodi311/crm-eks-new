@@ -64,7 +64,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Pull backend image
-        run: docker pull ${{ env.BACKEND_IMAGE }}
+        run: docker pull $BACKEND_IMAGE
 
       - name: Run backend container
         run: |
@@ -84,7 +84,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Pull frontend image
-        run: docker pull ${{ env.FRONTEND_IMAGE }}
+        run: docker pull $FRONTEND_IMAGE
 
       - name: Run frontend container
         run: |
