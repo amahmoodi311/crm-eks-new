@@ -54,6 +54,14 @@ jobs:
         run: |
           aws eks update-kubeconfig --name crm-cluster --region eu-north-1
 
+        
+      - name: Debug repo structure
+        run: |
+          echo "Current dir: $(pwd)"
+          ls -l $GITHUB_WORKSPACE
+          ls -l $GITHUB_WORKSPACE/k8s || echo "k8s folder missing"
+  
+
       - name: Deploy to EKS
         working-directory: k8s
         run: |
