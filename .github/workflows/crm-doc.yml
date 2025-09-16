@@ -7,52 +7,44 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Build Docker images
   build:
     runs-on: ubuntu-latest
     outputs:
       backend_image: ${{ steps.backend.outputs.image }}
       frontend_image: ${{ steps.frontend.outputs.image }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - uses: docker/login-action@v2
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build backend image
-        id: backend
+      - id: backend
         run: |
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-backend:latest
           docker build -t $IMAGE ./crm-api
           docker push $IMAGE
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
-      - name: Build frontend image
-        id: frontend
+      - id: frontend
         run: |
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-frontend:latest
           docker build -t $IMAGE ./crm-web
           docker push $IMAGE
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
-  # Database setup (MySQL)
   database:
     runs-on: self-hosted
     steps:
-      - name: Create Docker network
-        run: |
+      - run: |
           if docker network ls --format '{{ .Name }}' | grep -wq crmnetwork; then
             echo "crmnetwork exists"
           else
             docker network create crmnetwork
           fi
 
-      - name: Run MySQL container
-        run: |
+      - run: |
           if docker ps -a --format '{{ .Names }}' | grep -wq crmdb; then
             echo "crmdb container exists"
           else
@@ -65,7 +57,6 @@ jobs:
               mysql:8
           fi
 
-  # Backend deployment
   backend:
     needs:
       - build
@@ -74,11 +65,9 @@ jobs:
     env:
       BACKEND_IMAGE: ${{ needs.build.outputs.backend_image }}
     steps:
-      - name: Pull backend image
-        run: docker pull $BACKEND_IMAGE
+      - run: docker pull $BACKEND_IMAGE
 
-      - name: Run backend container
-        run: |
+      - run: |
           if docker ps -a --format '{{ .Names }}' | grep -wq backend; then
             docker container rm -f backend
           fi
@@ -90,18 +79,15 @@ jobs:
             -e PORT=3000 \
             $BACKEND_IMAGE
 
-  # Frontend deployment
   frontend:
     needs: backend
     runs-on: self-hosted
     env:
       FRONTEND_IMAGE: ${{ needs.build.outputs.frontend_image }}
     steps:
-      - name: Pull frontend image
-        run: docker pull $FRONTEND_IMAGE
+      - run: docker pull $FRONTEND_IMAGE
 
-      - name: Run frontend container
-        run: |
+      - run: |
           if docker ps -a --format '{{ .Names }}' | grep -wq web; then
             docker container rm -f web
           fi
