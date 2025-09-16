@@ -64,9 +64,7 @@ jobs:
 
       - name: Deploy to EKS
         run: |
-          echo "Current dir: $(pwd)"
-          ls -l
-          ls -l k8s || (echo "k8s folder missing" && exit 1)
+          
     
           cd k8s
           sed -i "s|IMAGE_BACKEND|${{ env.BACKEND_IMAGE }}|g" be-deployment.yml
