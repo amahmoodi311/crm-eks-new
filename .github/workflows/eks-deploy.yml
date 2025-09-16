@@ -55,6 +55,7 @@ jobs:
           aws eks update-kubeconfig --name crm-cluster --region eu-north-1
 
       - name: Deploy to EKS
+        working-directory: ./k8s
         run: |
           cd k8s
           sed -i "s|IMAGE_BACKEND|${{ env.BACKEND_IMAGE }}|g" be-deployment.yml
