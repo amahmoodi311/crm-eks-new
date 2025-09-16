@@ -11,60 +11,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      
       - name: Checkout repository
         uses: actions/checkout@v3
 
-    
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-    
       - name: Build and push backend image
         run: |
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-backend:latest
-          docker build -t $IMAGE ./crm-api
+          docker build -f ./crm-api/Dockerfile -t $IMAGE ./crm-api
           docker push $IMAGE
           echo "BACKEND_IMAGE=$IMAGE" >> $GITHUB_ENV
 
-    
       - name: Build and push frontend image
         run: |
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-frontend:latest
-          docker build -t $IMAGE ./crm-web
+          docker build -f ./crm-web/Dockerfile -t $IMAGE ./crm-web
           docker push $IMAGE
           echo "FRONTEND_IMAGE=$IMAGE" >> $GITHUB_ENV
 
-    
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ vars.MY_SECRET_ID }}
           aws-secret-access-key: ${{ secrets.MY_SECRET_KEY }}
-          aws-region: us-east-1  # change if needed
+          aws-region: us-east-1
 
-   
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --name crm-cluster --region eu-north-1
 
-     
       - name: Deploy to EKS
         run: |
           cd k8s
-          
           sed -i "s|IMAGE_BACKEND|${{ env.BACKEND_IMAGE }}|g" be-deployment.yml
           sed -i "s|IMAGE_FRONTEND|${{ env.FRONTEND_IMAGE }}|g" fe-deployment.yml
-
-          
           kubectl apply -f mysql-secret.yml
           kubectl apply -f mysql-deployment.yml
           kubectl apply -f mysql-service.yml
           kubectl apply -f be-deployment.yml
           kubectl apply -f be-service.yml
           kubectl apply -f fe-deployment.yml
-          kubectl apply -f fe-service.yml 
-          
+          kubectl apply -f fe-service.yml
