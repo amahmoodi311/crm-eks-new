@@ -10,8 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      backend_image: ${{ steps.backend.outputs.image }}
-      frontend_image: ${{ steps.frontend.outputs.image }}
+      backend_image: ${{ steps.backend.outputs.backend_image }}
+      frontend_image: ${{ steps.frontend.outputs.frontend_image }}
     steps:
       - uses: actions/checkout@v3
 
@@ -25,14 +25,14 @@ jobs:
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-backend:latest
           docker build -t $IMAGE ./crm-api
           docker push $IMAGE
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "backend_image=$IMAGE" >> $GITHUB_OUTPUT
 
       - id: frontend
         run: |
           IMAGE=${{ vars.DOCKER_USERNAME }}/crm-frontend:latest
           docker build -t $IMAGE ./crm-web
           docker push $IMAGE
-          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "frontend_image=$IMAGE" >> $GITHUB_OUTPUT
 
   database:
     runs-on: self-hosted
