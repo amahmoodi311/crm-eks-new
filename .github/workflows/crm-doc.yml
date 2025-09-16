@@ -1,0 +1,100 @@
+name: CRM Deployment (Docker Hub + MySQL)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      backend_image: ${{ steps.backend.outputs.backend_image }}
+      frontend_image: ${{ steps.frontend.outputs.frontend_image }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: docker/login-action@v2
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - id: backend
+        run: |
+          IMAGE=${{ vars.DOCKER_USERNAME }}/crm-backend:latest
+          docker build -t $IMAGE ./crm-api
+          docker push $IMAGE
+          echo "::set-output name=backend_image::$IMAGE"
+
+      - id: frontend
+        run: |
+          IMAGE=${{ vars.DOCKER_USERNAME }}/crm-frontend:latest
+          docker build -t $IMAGE ./crm-web
+          docker push $IMAGE
+          echo "::set-output name=frontend_image::$IMAGE"
+
+  database:
+    runs-on: self-hosted
+    steps:
+      - run: |
+          if docker network ls --format '{{ .Name }}' | grep -wq crmnetwork; then
+            echo "crmnetwork exists"
+          else
+            docker network create crmnetwork
+          fi
+
+      - run: |
+          if docker ps -a --format '{{ .Names }}' | grep -wq crmdb; then
+            echo "crmdb container exists"
+          else
+            docker container run -dt \
+              --name crmdb \
+              -p 3306:3306 \
+              --network crmnetwork \
+              -e MYSQL_ROOT_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e MYSQL_DATABASE=crmdb \
+              mysql:8
+          fi
+
+  backend:
+    needs:
+      - build
+      - database
+    runs-on: self-hosted
+    env:
+      BACKEND_IMAGE: ${{ needs.build.outputs.backend_image }}
+    steps:
+      - run: echo "Backend image: $BACKEND_IMAGE"  # debug
+      - run: docker pull $BACKEND_IMAGE
+
+      - run: |
+          if docker ps -a --format '{{ .Names }}' | grep -wq backend; then
+            docker container rm -f backend
+          fi
+          docker container run -dt \
+            --name backend \
+            -p 3000:3000 \
+            --network crmnetwork \
+            -e DATABASE_URL=mysql://root:${{ secrets.DB_PASSWORD }}@crmdb:3306/crmdb \
+            -e PORT=3000 \
+            $BACKEND_IMAGE
+
+  frontend:
+    needs: backend
+    runs-on: self-hosted
+    env:
+      FRONTEND_IMAGE: ${{ needs.build.outputs.frontend_image }}
+    steps:
+      - run: echo "Frontend image: $FRONTEND_IMAGE"  # debug
+      - run: docker pull $FRONTEND_IMAGE
+
+      - run: |
+          if docker ps -a --format '{{ .Names }}' | grep -wq web; then
+            docker container rm -f web
+          fi
+          docker container run -dt \
+            --name web \
+            --network crmnetwork \
+            -p 8080:80 \
+            $FRONTEND_IMAGE
