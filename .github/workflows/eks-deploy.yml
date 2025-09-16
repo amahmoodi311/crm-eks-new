@@ -63,9 +63,12 @@ jobs:
   
 
       - name: Deploy to EKS
-        working-directory: ${{ github.workspace }}/k8s
         run: |
-        
+          echo "Current dir: $(pwd)"
+          ls -l
+          ls -l k8s || (echo "k8s folder missing" && exit 1)
+    
+          cd k8s
           sed -i "s|IMAGE_BACKEND|${{ env.BACKEND_IMAGE }}|g" be-deployment.yml
           sed -i "s|IMAGE_FRONTEND|${{ env.FRONTEND_IMAGE }}|g" fe-deployment.yml
           kubectl apply -f mysql-secret.yml
