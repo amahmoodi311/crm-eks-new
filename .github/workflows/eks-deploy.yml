@@ -55,9 +55,8 @@ jobs:
           aws eks update-kubeconfig --name crm-cluster --region eu-north-1
 
       - name: Deploy to EKS
-        working-directory: k8s
         run: |
-        
+          cd $GITHUB_WORKSPACE/k8s
           sed -i "s|IMAGE_BACKEND|${{ env.BACKEND_IMAGE }}|g" be-deployment.yml
           sed -i "s|IMAGE_FRONTEND|${{ env.FRONTEND_IMAGE }}|g" fe-deployment.yml
           kubectl apply -f mysql-secret.yml
