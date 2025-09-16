@@ -66,4 +66,4 @@ jobs:
           kubectl apply -f be-deployment.yml
           kubectl apply -f be-service.yml
           kubectl apply -f fe-deployment.yml
-          kubectl apply -f fe-service.yml
+          kubectl apply -f fe-service.yml 
